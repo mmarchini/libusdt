@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -O2 -Wall
 
-# MAC_BUILD - set this to "universal" to build a 2-way fat library 
+# MAC_BUILD - set this to "universal" to build a 2-way fat library
 MAC_BUILD = universal
 
 # if ARCH set, disable universal build on the mac
@@ -15,7 +15,7 @@ UNAME = $(shell uname -s)
 
 ifeq ($(UNAME), Linux)
 RANLIB=ranlib
-CFLAGS+=-D_GNU_SOURCE -fPIC
+CFLAGS+=-D_GNU_SOURCE -fPIC  -I/dtrace/uts/common -I/dtrace/linux
 endif
 
 ifeq ($(UNAME), SunOS)
@@ -29,7 +29,7 @@ ARCH = x86_64
 else
 ARCH = i386
 endif
-endif 
+endif
 ifeq ($(ARCH), x86_64)
 CFLAGS += -m64
 else
@@ -68,10 +68,10 @@ all: libusdt.a
 
 libusdt.a: $(objects) $(headers)
 	rm -f libusdt.a
-	$(AR) cru libusdt.a $(objects) 
+	$(AR) cru libusdt.a $(objects)
 	$(RANLIB) libusdt.a
 
-# Tracepoints build. 
+# Tracepoints build.
 #
 # If on Darwin and building a universal library, manually assemble a
 # two-way fat object file from both the 32 and 64 bit tracepoint asm
@@ -125,7 +125,7 @@ clean:
 # testing
 
 test_mem_usage: libusdt.a test_mem_usage.o
-	$(CC) $(CFLAGS) -o test_mem_usage test_mem_usage.o libusdt.a 
+	$(CC) $(CFLAGS) -o test_mem_usage test_mem_usage.o libusdt.a
 
 ifeq ($(UNAME), Darwin)
 ifeq ($(MAC_BUILD), universal)
@@ -135,11 +135,11 @@ test_usdt32: libusdt.a test_usdt.o
 	$(CC) -arch i386 -o test_usdt32 test_usdt.o libusdt.a
 else
 test_usdt: libusdt.a test_usdt.o
-	$(CC) $(CFLAGS) -o test_usdt test_usdt.o libusdt.a 
+	$(CC) $(CFLAGS) -o test_usdt test_usdt.o libusdt.a
 endif
 else
 test_usdt: libusdt.a test_usdt.o
-	$(CC) $(CFLAGS) -o test_usdt test_usdt.o libusdt.a 
+	$(CC) $(CFLAGS) -o test_usdt test_usdt.o libusdt.a
 endif
 
 ifeq ($(UNAME), Darwin)
@@ -155,4 +155,3 @@ else
 test: test_usdt
 	sudo prove test.pl
 endif
-

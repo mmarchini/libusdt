@@ -15,7 +15,7 @@ UNAME = $(shell uname -s)
 
 ifeq ($(UNAME), Linux)
 RANLIB=ranlib
-CFLAGS+=-D_GNU_SOURCE -fPIC  -I/dtrace/uts/common -I/dtrace/linux
+CFLAGS+=-D_GNU_SOURCE -fPIC  -Ilinux
 endif
 
 ifeq ($(UNAME), SunOS)

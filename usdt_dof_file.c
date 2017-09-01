@@ -52,10 +52,18 @@ load_dof(int fd, dof_helper_t *dh)
         return (int)(ioctlData->dofiod_helpers[0].dofhp_dof);
 }
 
+#else /* Solaris, FreeBSD and FreeBSD */
+
+#ifdef __linux__  /* Linuix */
+
+  static const char *helper = "/dev/dtrace_helper";
+
 #else /* Solaris and FreeBSD */
 
-/* ignore Sol10 GA ... */
-static const char *helper = "/dev/dtrace/helper";
+  /* ignore Sol10 GA ... */
+  static const char *helper = "/dev/dtrace/helper";
+
+#endif
 
 static int
 load_dof(int fd, dof_helper_t *dh)

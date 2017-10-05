@@ -20,7 +20,7 @@ CFLAGS+=-D_GNU_SOURCE -fPIC
 DISTRO = $(shell lsb_release -i)
 ifneq (Oracle,$(findstring Oracle,$(DISTRO)))
 # not Oracle distro, which means no DTrace. Fallback to Systemtap SDT implementation
-objects = usdt-systemtap.o
+objects = usdt-systemtap.o usdt-common.o
 headers = usdt.h
 CFLAGS+=-D_SYSTEMTAP_SDT -lstapsdt
 endif
@@ -70,7 +70,7 @@ endif
 # main library build
 
 ifndef objects
-objects = usdt.o usdt_dof_file.o usdt_tracepoints.o usdt_probe.o usdt_dof.o usdt_dof_sections.o
+objects = usdt.o  usdt-common.o usdt_dof_file.o usdt_tracepoints.o usdt_probe.o usdt_dof.o usdt_dof_sections.o
 headers = usdt.h usdt_internal.h
 endif
 

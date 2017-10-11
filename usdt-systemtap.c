@@ -6,9 +6,12 @@
 
 #include "usdt.h"
 
+ArgType_t stringToArgType(char *type) {
+  // TODO (mmarchini) better mapping of arguments, but for now this works
+  return uint64;
+}
 
 void usdt_fire_probe(usdt_probe_t *probe, size_t argc, void **argv) {
-  // XXX IMPLEMENT NOW
   switch(argc) {
     case 0:
       probeFire((SDTProbe_t *)probe->probe_addr);
@@ -49,22 +52,43 @@ int usdt_provider_enable(usdt_provider_t *provider) {
         stapProbe = providerAddProbe(stapProvider, node->name, node->argc);
         break;
       case 1:
-        stapProbe = providerAddProbe(stapProvider, node->name, node->argc, (*(node->types))[0]);
+        stapProbe = providerAddProbe(stapProvider, node->name, node->argc,
+          stringToArgType(((node->types))[0]));
         break;
       case 2:
-        stapProbe = providerAddProbe(stapProvider, node->name, node->argc, (*(node->types))[0], (*(node->types))[1]);
+        stapProbe = providerAddProbe(stapProvider, node->name, node->argc,
+          stringToArgType(((node->types))[0]),
+          stringToArgType(((node->types))[1]));
         break;
       case 3:
-        stapProbe = providerAddProbe(stapProvider, node->name, node->argc, (*(node->types))[0], (*(node->types))[1], (*(node->types))[2]);
+        stapProbe = providerAddProbe(stapProvider, node->name, node->argc,
+          stringToArgType(((node->types))[0]),
+          stringToArgType(((node->types))[1]),
+          stringToArgType(((node->types))[2]));
         break;
       case 4:
-        stapProbe = providerAddProbe(stapProvider, node->name, node->argc, (*(node->types))[0], (*(node->types))[1], (*(node->types))[2], (*(node->types))[3]);
+        stapProbe = providerAddProbe(stapProvider, node->name, node->argc,
+          stringToArgType(((node->types))[0]),
+          stringToArgType(((node->types))[1]),
+          stringToArgType(((node->types))[2]),
+          stringToArgType(((node->types))[3]));
         break;
       case 5:
-        stapProbe = providerAddProbe(stapProvider, node->name, node->argc, (*(node->types))[0], (*(node->types))[1], (*(node->types))[2], (*(node->types))[3], (*(node->types))[4]);
+        stapProbe = providerAddProbe(stapProvider, node->name, node->argc,
+          stringToArgType(((node->types))[0]),
+          stringToArgType(((node->types))[1]),
+          stringToArgType(((node->types))[2]),
+          stringToArgType(((node->types))[3]),
+          stringToArgType(((node->types))[4]));
         break;
       case 6:
-        stapProbe = providerAddProbe(stapProvider, node->name, node->argc, (*(node->types))[0], (*(node->types))[1], (*(node->types))[2], (*(node->types))[3], (*(node->types))[4], (*(node->types))[5]);
+        stapProbe = providerAddProbe(stapProvider, node->name, node->argc,
+          stringToArgType(((node->types))[0]),
+          stringToArgType(((node->types))[1]),
+          stringToArgType(((node->types))[2]),
+          stringToArgType(((node->types))[3]),
+          stringToArgType(((node->types))[4]),
+          stringToArgType(((node->types))[5]));
         break;
       default:
         stapProbe = providerAddProbe(stapProvider, node->name, 0);
@@ -75,18 +99,17 @@ int usdt_provider_enable(usdt_provider_t *provider) {
   return providerLoad(stapProvider);
 }
 
-// XXX skip implementation for now
-
-void usdt_probe_release(usdt_probedef_t *probedef) {
-  printf("usdt_probe_release: not implemented yet!\n");
-}
-
 int usdt_is_enabled(usdt_probe_t *probe) {
-  SDTProbe_t *sdtProbe;
   if(probe->probe_addr == NULL) {
     return 0;
   }
   return probeIsEnabled((SDTProbe_t *) probe->probe_addr);
+}
+
+// XXX skip implementation for now
+
+void usdt_probe_release(usdt_probedef_t *probedef) {
+  printf("usdt_probe_release: not implemented yet!\n");
 }
 
 int usdt_provider_remove_probe(usdt_provider_t *provider, usdt_probedef_t *probedef) {
@@ -101,5 +124,3 @@ int usdt_provider_disable(usdt_provider_t *provider) {
 void usdt_provider_free(usdt_provider_t *provider) {
   printf("usdt_provider_free: not implemented yet!");
 }
-
-// XXX Same imeplentations

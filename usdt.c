@@ -40,37 +40,6 @@ usdt_probe_release(usdt_probedef_t *probedef)
 }
 
 int
-usdt_provider_remove_probe(usdt_provider_t *provider, usdt_probedef_t *probedef)
-{
-        usdt_probedef_t *pd, *prev_pd = NULL;
-
-        if (provider->probedefs == NULL) {
-                usdt_error(provider, USDT_ERROR_NOPROBES);
-                return (-1);
-        }
-
-        for (pd = provider->probedefs; (pd != NULL);
-             prev_pd = pd, pd = pd->next) {
-
-                if ((strcmp(pd->name, probedef->name) == 0) &&
-                    (strcmp(pd->function, probedef->function) == 0)) {
-
-                        if (prev_pd == NULL)
-                                provider->probedefs = pd->next;
-                        else
-                                prev_pd->next = pd->next;
-
-                        return (0);
-                }
-        }
-
-        usdt_error(provider, USDT_ERROR_REMOVE_PROBE,
-                   provider->name, provider->module,
-                   probedef->function, probedef->name);
-        return (-1);
-}
-
-int
 usdt_provider_enable(usdt_provider_t *provider)
 {
         usdt_strtab_t strtab;

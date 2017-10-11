@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
@@ -12,6 +13,9 @@ ArgType_t stringToArgType(char *type) {
 }
 
 void usdt_fire_probe(usdt_probe_t *probe, size_t argc, void **argv) {
+  if (probe == NULL)
+    return;
+
   switch(argc) {
     case 0:
       probeFire((SDTProbe_t *)probe->probe_addr);
@@ -96,10 +100,19 @@ int usdt_provider_enable(usdt_provider_t *provider) {
     node->probe->probe_addr = (void *)stapProbe;
   }
   provider->file = (void *)stapProvider;
-  return providerLoad(stapProvider);
+  if(providerLoad(stapProvider) == 0) {
+    provider->enabled = 1;
+    return 0;
+  }
+  else {
+    return -1;
+  }
 }
 
 int usdt_is_enabled(usdt_probe_t *probe) {
+  if(probe == NULL) {
+    return 0;
+  }
   if(probe->probe_addr == NULL) {
     return 0;
   }
@@ -108,19 +121,60 @@ int usdt_is_enabled(usdt_probe_t *probe) {
 
 // XXX skip implementation for now
 
-void usdt_probe_release(usdt_probedef_t *probedef) {
-  printf("usdt_probe_release: not implemented yet!\n");
+void free_probedef(usdt_probedef_t *pd) {
+  int i;
+
+  free((char *)pd->function);
+  free((char *)pd->name);
+
+  pd->probe = NULL;
+
+  for (i = 0; i < pd->argc; i++) {
+    free(pd->types[i]);
+  }
+
+  free(pd);
 }
 
-int usdt_provider_remove_probe(usdt_provider_t *provider, usdt_probedef_t *probedef) {
-  printf("usdt_provider_remove_probe: not implemented yet!");
-  return 0;
+void usdt_probe_release(usdt_probedef_t *probedef) {
+  free_probedef(probedef);
 }
 
 int usdt_provider_disable(usdt_provider_t *provider) {
-  printf("usdt_provider_disable: not implemented yet!");
-  return 0;
+  usdt_probedef_t *pd;
+
+  if (provider->enabled == 0)
+          return (0);
+
+  if ((providerUnload((SDTProvider_t *)provider->file)) < 0) {
+          usdt_error(provider, USDT_ERROR_UNLOADDOF, strerror(errno));
+          return (-1);
+  }
+
+  providerDestroy((SDTProvider_t *)provider->file);
+  provider->file = NULL;
+
+  /* providerDestroy already frees all probes, so we only need to set them to NULL here */
+  for (pd = provider->probedefs; (pd != NULL); pd = pd->next) {
+    if (pd->probe) {
+      pd->probe = NULL;
+    }
+  }
+
+  provider->enabled = 0;
+
+  return (0);
 }
+
 void usdt_provider_free(usdt_provider_t *provider) {
-  printf("usdt_provider_free: not implemented yet!");
+  usdt_probedef_t *pd, *next;
+
+  for (pd = provider->probedefs; pd != NULL; pd = next) {
+    next = pd->next;
+    free_probedef(pd);
+  }
+
+  free((char *)provider->name);
+  free((char *)provider->module);
+  free(provider);
 }
